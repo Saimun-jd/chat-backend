@@ -1,0 +1,39 @@
+{
+  "name": "chat-backend",
+  "version": "1.0.0",
+  "description": "backend for mern chat app",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saimun-jd/mern-chat-backend.git"
+  },
+  "author": "saimunjs",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/Saimun-jd/mern-chat-backend/issues"
+  },
+  "homepage": "https://github.com/Saimun-jd/mern-chat-backend#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-validator": "^7.0.1",
+    "http-errors": "^2.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.3.3",
+    "multer": "^1.4.5-lts.1",
+    "socket.io": "^4.7.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

@@ -1,0 +1,34 @@
+import express from "express";
+import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import authRoutes from "./routes/auth.routes.js";
+import { connectToDB } from "./db/connectToMongoDB.js";
+import messageRoutes from "./routes/message.routes.js";
+import friendsRoutes from "./routes/friends.routes.js";
+import cors from "cors";
+
+const app = express()
+const corsOptions = {
+	origin: 'http://localhost:3000',
+    credentials:true,
+	optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
+dotenv.config()
+app.use(express.json());
+app.use(cookieParser());
+
+const PORT = process.env.PORT || 5000;
+
+app.get("/", (req, res) => {
+     res.send("Hello world");
+})
+
+app.use("/api/auth", authRoutes);
+app.use("/api/message", messageRoutes);
+app.use("/api/friends", friendsRoutes);
+
+app.listen(PORT, () => {
+    connectToDB();
+    console.log(`server running on port ${PORT}`);
+})
