@@ -1,42 +1,49 @@
 import Conversation from "../models/conversations.model.js";
 import Message from "../models/messages.model.js";
-import { compareAsc, compareDesc, parseISO } from 'date-fns';
+import User from "../models/user.model.js";
+import { createAndSendMessage } from "../utils/messageSender.js";
+
 
 export const sendMessage = async (req, res) => {
 	try {
 		const { message } = req.body;
 		const { id: receiverID } = req.params;
 		const senderID = req.user._id;
-		if (senderID.toString() !== receiverID.toString()) {
-			let conversation = await Conversation.findOne({
-				participants: { $all: [senderID, receiverID] },
-			});
 
-			if (!conversation) {
-				conversation = await Conversation.create({
-					participants: [senderID, receiverID],
-				});
-			}
-			const newMessage = new Message({
-				senderID,
-				receiverID,
-				message,
-			});
-			if (newMessage) {
-				conversation.messages.push(newMessage._id);
-			}
-			// await conversation.save();
-			// await newMessage.save();
-			await Promise.all([conversation.save(), newMessage.save()]);
-			res.status(201).json({ newMessage });
-		} else {
-			res.status(400).json({ error: "Cannot send message to self" });
-		}
+		const result = await createAndSendMessage(senderID, receiverID, message);
+		res.status(result.status).json(result.data);
 	} catch (error) {
-		console.log("Error in send message controller", error.message);
+		console.log("Error in sendMessage controller", error.message);
 		res.status(500).json({ error: "Internal server error send message" });
 	}
 };
+
+
+export const sendNewMessage = async (req, res) => {
+	try {
+		const { username, message } = req.body;
+		const senderID = req.user._id;
+
+		let user = await User.findOne({ username });
+		if (!user) {
+			return res.status(400).json({ error: "No user exists with such name" });
+		}
+
+		const receiverID = user._id;
+
+		if (senderID.toString() === receiverID.toString()) {
+			return res.status(400).json({ error: "Cannot send message to self" });
+		}
+
+		const result = await createAndSendMessage(senderID, receiverID, message);
+
+		return res.status(result.status).json(result.data);
+	} catch (error) {
+		console.log("Error in sendNewMessage controller", error.message);
+		return res.status(500).json({ error: "Internal server error send new message" });
+	}
+};
+
 
 export const getMessage = async (req, res) => {
 	try {
