@@ -6,10 +6,12 @@ import { connectToDB } from "./db/connectToMongoDB.js";
 import messageRoutes from "./routes/message.routes.js";
 import friendsRoutes from "./routes/friends.routes.js";
 import cors from "cors";
+import sgMail from "@sendgrid/mail"
+
 
 const app = express()
 const corsOptions = {
-	origin: 'http://localhost:3000',
+    origin: 'http://localhost:3000',
     credentials:true,
 	optionsSuccessStatus: 200
 };
@@ -17,12 +19,13 @@ app.use(cors(corsOptions));
 dotenv.config()
 app.use(express.json());
 app.use(cookieParser());
+sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const PORT = process.env.PORT || 5000;
 
-app.get("/", (req, res) => {
-     res.send("Hello world");
-})
+// app.get("/", (req, res) => {
+//      res.send("Hello world");
+// })
 
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);

@@ -1,6 +1,15 @@
 import User from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 import generateTokenAndSetCookies from "../utils/generateToken.js";
+import crypto from "crypto"
+import { sendMail } from "../utils/sendEmail.js";
+
+// const createToken = (_id) => {
+//   const jwtSecretKey = process.env.JWT_SECRET;
+
+//   return jwt.sign({ _id }, jwtSecretKey, { expiresIn: "1d" });
+// };
+
 
 export const loginUser = async (req, res) => {
     try{
@@ -10,8 +19,11 @@ export const loginUser = async (req, res) => {
         if(!user || !isPassCorrect) {
             return res.status(400).json({error: "Invalid username or password"});
         }
+        if(!user?.isVerified) {
+            return res.status(400).json({error: "email not verified"});
+        }
         const token = generateTokenAndSetCookies(user._id, res);
-        res.status(200).json({user: {_id: user._id, username: user.username}, accessToken: token});
+        res.status(200).json({user: {_id: user._id, username: user.username}, accessToken: token, isVerified: user?.isVerified});
     } catch(error) {
         console.log("Error login controller", error.message);
         res.status(500).json({error: "Internal server error"});
@@ -42,18 +54,58 @@ export const signupUser = async (req, res) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
         const newUser = new User({
-            username, email, password: hashedPassword
+            username, email, password: hashedPassword, emailtoken: crypto.randomBytes(64).toString("hex"), isVerified: false
         });
         if(newUser) {
             // generate jwt token
             const token = generateTokenAndSetCookies(newUser._id, res);
+
+            try{
+                await sendMail({
+                    to: email,
+                    from: process.env.SENDER_EMAIL,
+                    subject: 'Please verify your email by clicking the link below',
+                    text: "Click the link",
+                    html: `
+                    <h1>Thanks for registering to our site</h1>
+                    <p>Please click the link to verify your account</p>
+                    <a href="http://localhost:3000/verify-email?token=${newUser.emailtoken}">Verify your account</a>
+                    ` 
+                })
+            } catch(error) {
+                res.status(500).json({error: error.message})
+            }
             await newUser.save();
-            res.status(200).json({user: {_id: newUser._id, username: newUser.username}, accessToken: token});
+            res.status(200).json({user: {_id: newUser._id, username: newUser.username}, accessToken: token, isVerified: newUser?.isVerified});
         } else {
             res.status(400).json({error: "Invalid user data"});
         }
     } catch(error) {
         console.log("Error signup controller", error.message);
         res.status(500).json({error: "Internal server error"});
+    }
+}
+
+export const verifyEmail = async (req, res) => {
+    try {
+        const emailtoken = req.query.token;
+        console.log(emailtoken)
+        if(!emailtoken) return res.status(404).json("Verification token not found");
+
+        const user = await User.findOne({emailtoken});
+
+        if(user) {
+            user.emailtoken = null;
+            user.isVerified = true;
+            await user.save();
+
+            res.status(200).json({
+                message: "email verification successful"
+            });
+        }
+        else res.status(404).json({error: "Email verification failed"});
+        
+    } catch(error){
+        res.status(500).json(error.message);
     }
 }
