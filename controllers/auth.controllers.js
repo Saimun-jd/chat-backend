@@ -89,23 +89,43 @@ export const signupUser = async (req, res) => {
 export const verifyEmail = async (req, res) => {
     try {
         const emailtoken = req.query.token;
-        console.log(emailtoken)
+        // console.log(emailtoken)
         if(!emailtoken) return res.status(404).json("Verification token not found");
 
         const user = await User.findOne({emailtoken});
+
+        if(user.isVerified) return res.status(400).json({error: "email already verified"});
 
         if(user) {
             user.emailtoken = null;
             user.isVerified = true;
             await user.save();
-
+            const token = generateTokenAndSetCookies(user._id, res);
             res.status(200).json({
-                message: "email verification successful"
+                message: "email verification successful",
+                user: {_id: user._id, username: user.username},
+                accessToken: token,
+                isVerified: user?.isVerified
             });
         }
-        else res.status(404).json({error: "Email verification failed"});
+        else res.status(400).json({error: "Email verification failed"});
         
     } catch(error){
-        res.status(500).json(error.message);
+        res.status(500).json({error: error.message});
+    }
+}
+
+export const findUser = async (req, res) => {
+    try{
+        const username = req.query.username;
+        if(!username) return res.status(404).json({error: "no username provided"});
+
+        const user = await User.findOne({username});
+        if(!user) return res.status(404).json({error: "User not found"})
+        // if(user.username === username) return res.status(500).json({error: "cannot send message to self"});
+        return res.status(200).json({message: "user found"})
+
+    } catch(error) {
+        res.status(500).json({error: error.message});
     }
 }

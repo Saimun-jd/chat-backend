@@ -23,7 +23,7 @@ const protectRoute = async (req, res, next) => {
 
         // Verifiaction status
         if(!user.isVerified) {
-            return res.status(310).json({errro: "Email not verified"});
+            return res.status(310).json({error: "Email not verified"});
         }
 
         req.user = user;
