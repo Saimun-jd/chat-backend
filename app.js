@@ -11,7 +11,7 @@ import sgMail from "@sendgrid/mail"
 
 const app = express()
 const corsOptions = {
-    origin: 'https://mychatify-react.vercel.app',
+    origin: ['http://localhost:3000',, 'https://mychatify-react.vercel.app'],
     credentials:true,
 	optionsSuccessStatus: 200,
     methods: ["POST", "GET"]
@@ -24,9 +24,9 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const PORT = process.env.PORT || 5000;
 
-// app.get("/", (req, res) => {
-//      res.send("Hello world");
-// })
+app.get("/", (req, res) => {
+     res.send("Hello from chatify");
+})
 
 app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
