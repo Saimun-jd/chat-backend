@@ -11,9 +11,10 @@ import sgMail from "@sendgrid/mail"
 
 const app = express()
 const corsOptions = {
-    origin: 'http://localhost:3000',
+    origin: 'https://mychatify-react.vercel.app',
     credentials:true,
-	optionsSuccessStatus: 200
+	optionsSuccessStatus: 200,
+    methods: ["POST", "GET"]
 };
 app.use(cors(corsOptions));
 dotenv.config()
