@@ -57,7 +57,25 @@ export const getMessage = async (req, res) => {
 		if (!conversation) {
 			return res.status(200).json([]);
 		}
-		res.status(200).json(conversation.messages);
+		console.log("the length of array ",conversation.messages.length)
+		const allconversations = conversation.messages.map((conv) => {
+			return {
+				_id: conv._id,
+				sender: {
+					_id: conv.senderID._id,
+					username: conv.senderID.username
+				},
+				receiver: {
+					_id: conv.receiverID!==null? conv.receiverID._id: 'unknownid',
+					username: conv.receiverID!==null ? conv.receiverID.username: 'unknown user'
+				},
+				message: conv.message,
+				createdAt: conv.createdAt,
+				updatedAt: conv.updatedAt
+			}
+		})
+		console.log(allconversations);
+		res.status(200).json(allconversations);
 	} catch (error) {
 		console.log("Error in send message controller", error.message);
 		res.status(500).json({
@@ -78,7 +96,7 @@ export const getLastMessage = async (req, res) => {
             populate: {
                 path: 'senderID receiverID', // Populate senderID and receiverID fields in messages
             },
-        }).populate('participants');
+        })
 
         // Find the most recent message and the other participant in each conversation
         const lastMessages = conversations.map(conversation => {
@@ -87,21 +105,29 @@ export const getLastMessage = async (req, res) => {
                 const lastMessage = conversation.messages[0];
 
                 // Find the other participant
-                const otherParticipant = conversation.participants.find(
-                    participant => participant._id.toString() !== senderID.toString()
-                );
+                // const otherParticipant = conversation.participants.find(
+                //     participant => participant._id.toString() !== senderID.toString()
+                // );
+				// console.log("lastMessage is ");
+				console.log(lastMessage);
 
                 return {
-                    participant: otherParticipant,
-                    lastMessage,
+						_id: lastMessage._id,
+						sender: lastMessage.senderID.username,
+						receiver: lastMessage.receiverID !== null? lastMessage.receiverID.username: 'unknown user',
+						message: lastMessage.message,
+						createdAt: lastMessage.createdAt !== undefined ?lastMessage.createdAt: Date.now(),
+						updatedAt: lastMessage.updatedAt !== undefined ?lastMessage.updatedAt: Date.now(),
+						senderID: lastMessage.senderID._id,
+						receiverID: lastMessage.receiverID !== null? lastMessage.receiverID._id: 'no id'
                 };
             }
             return null;
         }).filter(entry => entry !== null); // Filter out conversations without messages
 
         // Sort the results by the updatedAt timestamp of the most recent message
-        lastMessages.sort((a, b) => new Date(b.lastMessage.updatedAt) - new Date(a.lastMessage.updatedAt));
-
+        lastMessages.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+		// console.log(lastMessages);
         // Now lastMessages contains the most recent message for each conversation, sorted by the most recent message across all conversations
         return res.status(200).json(lastMessages);
     } catch (error) {
