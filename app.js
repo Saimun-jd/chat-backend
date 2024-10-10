@@ -8,6 +8,7 @@ import friendsRoutes from "./routes/friends.routes.js";
 import cors from "cors";
 import sgMail from "@sendgrid/mail"
 import {Server} from 'socket.io';
+import {createServer} from 'http'
 
 
 const app = express()
@@ -24,6 +25,7 @@ app.use(cookieParser());
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const PORT = process.env.PORT || 5000;
+const server = createServer(app);
 
 app.get("/", (req, res) => {
      res.send("Hello from chatify");
@@ -33,7 +35,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/friends", friendsRoutes);
 
-const server = app.listen(PORT, () => {
+server.listen(PORT, () => {
     connectToDB();
     console.log(`server running on port ${PORT}`);
 })
