@@ -7,6 +7,7 @@ import messageRoutes from "./routes/message.routes.js";
 import friendsRoutes from "./routes/friends.routes.js";
 import cors from "cors";
 import sgMail from "@sendgrid/mail"
+import {Server} from 'socket.io';
 
 
 const app = express()
@@ -32,7 +33,32 @@ app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/friends", friendsRoutes);
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     connectToDB();
     console.log(`server running on port ${PORT}`);
+})
+
+const io = new Server(server, {
+    pingTimeout: 6000,
+    cors: {
+        origin: ['http://localhost:3000', 'https://slurpping.onrender.com']
+    }
+})
+
+io.on('connection', (socket) => {
+    console.log("connected to socket server");
+    socket.on('setup', (userInfo) => {
+        socket.join(userInfo._id);
+        socket.emit('connected')
+    })
+
+    socket.on('join chat', (room) => {
+        socket.join(room);
+        console.log("user joined room ", room);
+    })
+    socket.on('new message', (newMsg) => {
+        console.log(newMsg);
+        if(!newMsg) return;
+        socket.in(newMsg.receiver._id).emit('message received', newMsg);
+    })
 })
