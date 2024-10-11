@@ -69,7 +69,7 @@ export const signupUser = async (req, res) => {
                     html: `
                     <h1>Thanks for registering to our site</h1>
                     <p>Please click the link to verify your account</p>
-                    <a href="https://slurpping.onrender.com/api/auth/verify-email?token=${newUser.emailtoken}">Verify your account</a>
+                    <a href="https://slurpping.onrender.com/verify-email?token=${newUser.emailtoken}">Verify your account</a>
                     ` 
                 })
             } catch(error) {
@@ -87,6 +87,7 @@ export const signupUser = async (req, res) => {
 }
 
 export const verifyEmail = async (req, res) => {
+    console.log("verify email function enter");
     try {
         const emailtoken = req.query.token;
         console.log('email token: ',emailtoken);
