@@ -89,7 +89,7 @@ export const signupUser = async (req, res) => {
 export const verifyEmail = async (req, res) => {
     try {
         const emailtoken = req.query.token;
-        // console.log(emailtoken)
+        console.log('email token: ',emailtoken);
         if(!emailtoken) return res.status(404).json("Verification token not found");
 
         const user = await User.findOne({emailtoken});
@@ -101,6 +101,7 @@ export const verifyEmail = async (req, res) => {
             user.isVerified = true;
             await user.save();
             const token = generateTokenAndSetCookies(user._id, res);
+            console.log('email verified successfully');
             res.status(200).json({
                 message: "email verification successful",
                 user: {_id: user._id, username: user.username},
