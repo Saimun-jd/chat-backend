@@ -47,20 +47,37 @@ const io = new Server(server, {
     }
 })
 
+const activeUsers = new Map();
+
 io.on('connection', (socket) => {
     console.log("connected to socket server");
+
     socket.on('setup', (userInfo) => {
+        activeUsers.set(userInfo._id, socket.id);
         socket.join(userInfo._id);
         socket.emit('connected')
-    })
+    });
 
     socket.on('join chat', (room) => {
         socket.join(room);
         console.log("user joined room ", room);
-    })
+    });
+
     socket.on('new message', (newMsg) => {
         console.log(newMsg);
         if(!newMsg) return;
-        socket.in(newMsg.receiver._id).emit('message received', newMsg);
-    })
-})
+
+        const receiverSocketId = activeUsers.get(newMsg.receiver._id);
+        if (receiverSocketId) {
+            io.to(receiverSocketId).emit('message received', newMsg);
+        }
+    });
+
+    socket.on('disconnect', () => {
+        activeUsers.forEach((value, key) => {
+            if (value === socket.id) {
+                activeUsers.delete(key);
+            }
+        });
+    });
+});
