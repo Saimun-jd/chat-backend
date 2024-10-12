@@ -8,10 +8,10 @@ import friendsRoutes from "./routes/friends.routes.js";
 import cors from "cors";
 import sgMail from "@sendgrid/mail"
 import {Server} from 'socket.io';
-import {createServer} from 'http'
-
+import {createServer} from 'http';
 
 const app = express()
+const server = createServer(app);
 const corsOptions = {
     origin: ['http://localhost:3000',, 'https://slurpping.onrender.com'],
     credentials:true,
@@ -25,7 +25,6 @@ app.use(cookieParser());
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const PORT = process.env.PORT || 5000;
-const server = createServer(app);
 
 app.get("/", (req, res) => {
      res.send("Hello from chatify");
@@ -35,11 +34,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/friends", friendsRoutes);
 
-server.listen(PORT, () => {
-    connectToDB();
-    console.log(`server running on port ${PORT}`);
-})
-
 const io = new Server(server, {
     pingTimeout: 6000,
     cors: {
@@ -47,37 +41,9 @@ const io = new Server(server, {
     }
 })
 
-const activeUsers = new Map();
+global.io = io;
 
-io.on('connection', (socket) => {
-    console.log("connected to socket server");
-
-    socket.on('setup', (userInfo) => {
-        activeUsers.set(userInfo._id, socket.id);
-        socket.join(userInfo._id);
-        socket.emit('connected')
-    });
-
-    socket.on('join chat', (room) => {
-        socket.join(room);
-        console.log("user joined room ", room);
-    });
-
-    socket.on('new message', (newMsg) => {
-        console.log(newMsg);
-        if(!newMsg) return;
-
-        const receiverSocketId = activeUsers.get(newMsg.receiver._id);
-        if (receiverSocketId) {
-            io.to(receiverSocketId).emit('message received', newMsg);
-        }
-    });
-
-    socket.on('disconnect', () => {
-        activeUsers.forEach((value, key) => {
-            if (value === socket.id) {
-                activeUsers.delete(key);
-            }
-        });
-    });
-});
+server.listen(PORT, () => {
+    connectToDB();
+    console.log(`server running on port ${PORT}`);
+})

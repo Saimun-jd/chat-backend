@@ -11,6 +11,12 @@ export const sendMessage = async (req, res) => {
 		const senderID = req.user._id;
 
 		const result = await createAndSendMessage(senderID, receiverID, message);
+		
+		// emit event
+		io.emit('new message', {
+			data: result.data
+		});
+
 		res.status(result.status).json(result.data);
 	} catch (error) {
 		console.log("Error in sendMessage controller", error.message);
@@ -37,6 +43,9 @@ export const sendNewMessage = async (req, res) => {
 
 		const result = await createAndSendMessage(senderID, receiverID, message);
 
+		//emit to all users
+		io.emit('new conversation', {data: result.data})
+		console.log(result.data);
 		return res.status(result.status).json(result.data);
 	} catch (error) {
 		console.log("Error in sendNewMessage controller", error.message);
@@ -57,7 +66,7 @@ export const getMessage = async (req, res) => {
 		if (!conversation) {
 			return res.status(200).json([]);
 		}
-		console.log("the length of array ",conversation.messages.length)
+		// console.log("the length of array ",conversation.messages.length)
 		const allconversations = conversation.messages.map((conv) => {
 			return {
 				_id: conv._id,
@@ -74,7 +83,7 @@ export const getMessage = async (req, res) => {
 				updatedAt: conv.updatedAt
 			}
 		})
-		console.log(allconversations);
+		// console.log(allconversations);
 		res.status(200).json(allconversations);
 	} catch (error) {
 		console.log("Error in send message controller", error.message);
@@ -108,12 +117,12 @@ export const getLastMessage = async (req, res) => {
                 // const otherParticipant = conversation.participants.find(
                 //     participant => participant._id.toString() !== senderID.toString()
                 // );
-				// console.log("lastMessage is ");
+				console.log("lastMessage is ");
 				console.log(lastMessage);
 
                 return {
 						_id: lastMessage._id,
-						sender: lastMessage.senderID.username,
+						sender: lastMessage.senderID !== null? lastMessage.senderID.username: 'unknown user',
 						receiver: lastMessage.receiverID !== null? lastMessage.receiverID.username: 'unknown user',
 						message: lastMessage.message,
 						createdAt: lastMessage.createdAt !== undefined ?lastMessage.createdAt: Date.now(),
@@ -127,8 +136,12 @@ export const getLastMessage = async (req, res) => {
 
         // Sort the results by the updatedAt timestamp of the most recent message
         lastMessages.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+		
+
 		// console.log(lastMessages);
         // Now lastMessages contains the most recent message for each conversation, sorted by the most recent message across all conversations
+		// console.log("last message ", lastMessages[0].senderID._id);
         return res.status(200).json(lastMessages);
     } catch (error) {
         console.log("Error in get last messages controller", error.message);
