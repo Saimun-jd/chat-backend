@@ -14,7 +14,7 @@ import {createServer} from 'http';
 const app = express()
 const server = createServer(app);
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://slurpping.onrender.com', 'http://localhost:5173'],
+    origin: ['http://localhost:3000', 'https://slurpping.onrender.com', 'http://localhost:5173', 'https://oceanxplorer.vercel.app'],
     credentials:true,
 	optionsSuccessStatus: 200,
     methods: ["POST", "GET"]
