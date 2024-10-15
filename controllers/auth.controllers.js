@@ -47,8 +47,13 @@ export const signupUser = async (req, res) => {
             return res.status(400).json({error: "password doesn't match"});
         }
         const user = await User.findOne({username});
+        
         if(user) {
             return res.status(400).json({error: "Username already exist"});
+        }
+        const userByEmail = await User.findOne({email});
+        if(userByEmail) {
+            return res.status(400).json({error: "Email already exist"});
         }
         // password encryption
         const salt = await bcrypt.genSalt(10);
