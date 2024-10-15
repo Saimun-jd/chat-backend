@@ -10,6 +10,8 @@ import cors from "cors";
 import sgMail from "@sendgrid/mail"
 import {Server} from 'socket.io';
 import {createServer} from 'http';
+import { schedule } from "node-cron";
+import { deleteUnverifiedUsersJob } from "./utils/dbUtil.js";
 
 const app = express()
 const server = createServer(app);
@@ -63,5 +65,6 @@ global.io = io;
 
 server.listen(PORT, () => {
     connectToDB();
+    schedule('0 * * * *', deleteUnverifiedUsersJob);
     console.log(`server running on port ${PORT}`);
 })
