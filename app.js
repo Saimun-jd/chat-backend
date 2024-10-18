@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import session from 'express-session';
+import MongoStore from 'connect-mongo';
 import passport from "passport";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
@@ -31,6 +32,10 @@ app.use(session({
     secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
+  store: MongoStore.create({
+        mongoUrl: process.env.MONGO_URL,
+        ttl: 14 * 24 * 60 * 60 // = 14 days. Default
+    }),
   cookie: {
     secure: true, 
     httpOnly: true,
