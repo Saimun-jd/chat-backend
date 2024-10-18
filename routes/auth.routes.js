@@ -65,19 +65,29 @@ router.get('/google/callback',
     };
     console.log("when setting session ",req.session.googleAuthInfo);
 
-    // Redirect to frontend
-    res.redirect(`https://slurpping.onrender.com/google-auth-success`);
+    // Save session before redirect
+    req.session.save((err) => {
+      if (err) {
+        console.error('Error saving session:', err);
+        return res.redirect('https://slurpping.onrender.com?error=session_save_failed');
+      }
+      res.redirect(`https://slurpping.onrender.com/google-auth-success`);
+    });
   }
 );
 
 router.get('/google-auth-info', (req, res) => {
-  console.log("google auth  info ", req.session.googleAuthInfo);
+  console.log('Received request for /google-auth-info');
+  console.log('Session ID:', req.sessionID);
+  console.log('Session:', req.session);
+  console.log('Cookies:', req.cookies);
+
   if (req.session.googleAuthInfo) {
-    console.log(req.session.googleAuthInfo);
+    console.log('Google auth info found in session:', req.session.googleAuthInfo);
     res.json(req.session.googleAuthInfo);
-    // Clear the session data after sending it
     delete req.session.googleAuthInfo;
   } else {
+    console.log('No Google auth info found in session');
     res.status(401).json({ error: 'No Google auth info found' });
   }
 });
