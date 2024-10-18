@@ -63,7 +63,7 @@ router.get('/google/callback',
       accessToken: token,
       isVerified: req.user.isVerified
     };
-    // console.log(req.session.googleAuthInfo);
+    console.log("when setting session ",req.session.googleAuthInfo);
 
     // Redirect to frontend
     res.redirect(`https://slurpping.onrender.com/google-auth-success`);
@@ -71,6 +71,7 @@ router.get('/google/callback',
 );
 
 router.get('/google-auth-info', (req, res) => {
+  console.log("google auth  info ", req.session.googleAuthInfo);
   if (req.session.googleAuthInfo) {
     console.log(req.session.googleAuthInfo);
     res.json(req.session.googleAuthInfo);
