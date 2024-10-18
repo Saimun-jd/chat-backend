@@ -49,7 +49,7 @@ passport.deserializeUser(async (user, done) => {
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
 
 router.get('/google/callback', 
-  passport.authenticate('google', { failureRedirect: process.env.FRONTEND_URL }),
+  passport.authenticate('google', { failureRedirect: "https://slurpping.onrender.com" }),
   (req, res) => {
     const token = jwt.sign({ userID: req.user._id }, process.env.JWT_SECRET, { expiresIn: '15d' });
     // console.log(req.user);
@@ -66,7 +66,7 @@ router.get('/google/callback',
     // console.log(req.session.googleAuthInfo);
 
     // Redirect to frontend
-    res.redirect(`${process.env.FRONTEND_URL}/google-auth-success`);
+    res.redirect(`https://slurpping.onrender.com/google-auth-success`);
   }
 );
 
