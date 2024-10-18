@@ -23,8 +23,8 @@ const corsOptions = {
 	optionsSuccessStatus: 200,
     methods: ["POST", "GET"]
 };
-app.use(cors(corsOptions));
 dotenv.config()
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 app.use(session({
