@@ -1,5 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
+import session from 'express-session';
+import passport from "passport";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js";
 import { connectToDB } from "./db/connectToMongoDB.js";
@@ -25,6 +27,16 @@ app.use(cors(corsOptions));
 dotenv.config()
 app.use(express.json());
 app.use(cookieParser());
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false
+}));
+//initialize passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+//set sendgird api key
 sgMail.setApiKey(process.env.SENDGRID_API_KEY)
 
 const PORT = process.env.PORT || 5000;
