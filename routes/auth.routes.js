@@ -70,26 +70,26 @@ router.get(
 	}),
 	(req, res) => {
 		console.log('Google callback received');
-    const token = jwt.sign({ userID: req.user._id }, process.env.JWT_SECRET, { expiresIn: '15d' });
+    // const token = jwt.sign({ userID: req.user._id }, process.env.JWT_SECRET, { expiresIn: '15d' });
     
-    req.session.googleAuthInfo = {
-      user: {
-        _id: req.user._id,
-        username: req.user.username || req.user.email.split('@')[0],
-      },
-      accessToken: token,
-      isVerified: req.user.isVerified
-    };
+    // req.session.googleAuthInfo = {
+    //   user: {
+    //     _id: req.user._id,
+    //     username: req.user.username || req.user.email.split('@')[0],
+    //   },
+    //   accessToken: token,
+    //   isVerified: req.user.isVerified
+    // };
     console.log('Setting googleAuthInfo in session:', req.session.googleAuthInfo);
+    res.redirect(`https://slurpping.onrender.com/google-auth-success?id=${req.user._id}`);
 
-    req.session.save((err) => {
-      if (err) {
-        console.error('Error saving session:', err);
-        return res.redirect('https://slurpping.onrender.com?error=session_save_failed');
-      }
-      console.log('Session saved successfully');
-      res.redirect(`https://slurpping.onrender.com/google-auth-success`);
-    });
+    // req.session.save((err) => {
+    //   if (err) {
+    //     console.error('Error saving session:', err);
+    //     return res.redirect('https://slurpping.onrender.com?error=session_save_failed');
+    //   }
+    //   console.log('Session saved successfully');
+    // });
 	}
 );
 
@@ -112,17 +112,21 @@ router.get(
 router.get('/mongo-auth-info', async (req, res) => {
   try {
     console.log('Received request for /mongo-auth-info');
+    const {id} = req.query;
+    if(!id) {
+      res.status(400).json({error: "couldn't retrive id from query"});
+    }
     
     // Get the session ID from the cookie
     // const sessionId = req.cookies['mongo_session']; 
     // console.log('Session ID from cookie:', sessionId);
-    if(req.session.googleAuthInfo){
-      console.log(req.session.googleAuthInfo);
-      res.json(req.session.googleAuthInfo);
-    }else {
-      console.log("no session found");
-      res.json({message: "no session found"});
-    }
+    // if(req.session.googleAuthInfo){
+    //   console.log(req.session.googleAuthInfo);
+    //   res.json(req.session.googleAuthInfo);
+    // }else {
+    //   console.log("no session found");
+    //   res.json({message: "no session found"});
+    // }
 
     // if (!sessionId) {
     //   console.log('No session cookie found');
@@ -130,9 +134,14 @@ router.get('/mongo-auth-info', async (req, res) => {
     // }
 
     // // Find the session in MongoDB
-    // const sessionCollection = mongoose.connection.db.collection('sessions');
-    // const session = await sessionCollection.findOne({ _id: sessionId });
-
+    const usr = User.findOne({_id: id});
+    if(!usr) {
+      console.log("no user found with this id");
+      res.status(400).json({error: "invalid user access via id"});
+    }
+    
+        const token = generateTokenAndSetCookies(usr._id, res);
+        res.status(200).json({usr: {_id: usr._id, username: usr.username}, accessToken: token, isVerified: usr?.isVerified});
     // if (!session) {
     //   console.log('No session found in database');
     //   return res.status(401).json({ error: 'No session found in database' });
