@@ -35,7 +35,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
 	session({
-        name: 'mongo_session',
 		secret: process.env.SESSION_SECRET,
 		resave: false,
 		saveUninitialized: false,

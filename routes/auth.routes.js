@@ -114,61 +114,68 @@ router.get('/mongo-auth-info', async (req, res) => {
     console.log('Received request for /mongo-auth-info');
     
     // Get the session ID from the cookie
-    const sessionId = req.cookies['mongo_session']; // Make sure this matches your session cookie name
-    console.log('Session ID from cookie:', sessionId);
-
-    if (!sessionId) {
-      console.log('No session cookie found');
-      return res.status(401).json({ error: 'No session cookie found' });
+    // const sessionId = req.cookies['mongo_session']; 
+    // console.log('Session ID from cookie:', sessionId);
+    if(req.session.googleAuthInfo){
+      console.log(req.session.googleAuthInfo);
+      res.json(req.session.googleAuthInfo);
+    }else {
+      console.log("no session found");
+      res.json({message: "no session found"});
     }
 
-    // Find the session in MongoDB
-    const sessionCollection = mongoose.connection.db.collection('sessions');
-    const session = await sessionCollection.findOne({ _id: sessionId });
+    // if (!sessionId) {
+    //   console.log('No session cookie found');
+    //   return res.status(401).json({ error: 'No session cookie found' });
+    // }
 
-    if (!session) {
-      console.log('No session found in database');
-      return res.status(401).json({ error: 'No session found in database' });
-    }
+    // // Find the session in MongoDB
+    // const sessionCollection = mongoose.connection.db.collection('sessions');
+    // const session = await sessionCollection.findOne({ _id: sessionId });
 
-    console.log('Session found in database:', session);
+    // if (!session) {
+    //   console.log('No session found in database');
+    //   return res.status(401).json({ error: 'No session found in database' });
+    // }
 
-    // Parse the session data
-    const sessionData = JSON.parse(session.session);
+    // console.log('Session found in database:', session);
 
-    if (!sessionData.googleAuthInfo) {
-      console.log('No Google auth info found in session');
-      return res.status(401).json({ error: 'No Google auth info found in session' });
-    }
+    // // Parse the session data
+    // const sessionData = JSON.parse(session.session);
 
-    console.log('Google auth info from session:', sessionData.googleAuthInfo);
+    // if (!sessionData.googleAuthInfo) {
+    //   console.log('No Google auth info found in session');
+    //   return res.status(401).json({ error: 'No Google auth info found in session' });
+    // }
 
-    // Fetch the full user data from the User model
-    const user = await User.findById(sessionData.googleAuthInfo.user._id).select('-password');
+    // console.log('Google auth info from session:', sessionData.googleAuthInfo);
 
-    if (!user) {
-      console.log('User not found in database');
-      return res.status(401).json({ error: 'User not found' });
-    }
+    // // Fetch the full user data from the User model
+    // const user = await User.findById(sessionData.googleAuthInfo.user._id).select('-password');
 
-    console.log('User found in database:', user);
+    // if (!user) {
+    //   console.log('User not found in database');
+    //   return res.status(401).json({ error: 'User not found' });
+    // }
 
-    // Generate a new JWT token
-    const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '15d' });
+    // console.log('User found in database:', user);
 
-    // Prepare the response
-    const authInfo = {
-      user: {
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        isVerified: user.isVerified
-      },
-      accessToken: token
-    };
+    // // Generate a new JWT token
+    // const token = jwt.sign({ userID: user._id }, process.env.JWT_SECRET, { expiresIn: '15d' });
 
-    console.log('Sending auth info to client:', authInfo);
-    res.json(authInfo);
+    // // Prepare the response
+    // const authInfo = {
+    //   user: {
+    //     _id: user._id,
+    //     username: user.username,
+    //     email: user.email,
+    //     isVerified: user.isVerified
+    //   },
+    //   accessToken: token
+    // };
+
+    // console.log('Sending auth info to client:', authInfo);
+    // res.json(authInfo);
   } catch (error) {
     console.error('Error retrieving auth info from MongoDB:', error);
     res.status(500).json({ error: 'Internal server error' });
