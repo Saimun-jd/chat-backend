@@ -142,7 +142,7 @@ router.get('/mongo-auth-info', async (req, res) => {
     }
     
         const token = generateTokenAndSetCookies(usr._id, res);
-        res.status(200).json({usr: {_id: usr._id, username: usr.username}, accessToken: token, isVerified: usr?.isVerified});
+        res.status(200).json({user: {_id: usr._id, username: usr.username}, accessToken: token, isVerified: usr?.isVerified});
     // if (!session) {
     //   console.log('No session found in database');
     //   return res.status(401).json({ error: 'No session found in database' });
