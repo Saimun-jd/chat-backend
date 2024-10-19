@@ -85,7 +85,7 @@ router.get(
     req.session.save((err) => {
       if (err) {
         console.error('Error saving session:', err);
-        return res.redirect('https://slurpping.onrender.com/login?error=session_save_failed');
+        return res.redirect('https://slurpping.onrender.com?error=session_save_failed');
       }
       console.log('Session saved successfully');
       res.redirect(`https://slurpping.onrender.com/google-auth-success`);
@@ -114,7 +114,7 @@ router.get('/mongo-auth-info', async (req, res) => {
     console.log('Received request for /mongo-auth-info');
     
     // Get the session ID from the cookie
-    const sessionId = req.cookies['connect.sid']; // Make sure this matches your session cookie name
+    const sessionId = req.cookies['mongo_session']; // Make sure this matches your session cookie name
     console.log('Session ID from cookie:', sessionId);
 
     if (!sessionId) {
