@@ -11,6 +11,7 @@ import {
 } from "../controllers/auth.controllers.js";
 import User from "../models/user.model.js";
 import dotenv from "dotenv";
+import generateTokenAndSetCookies from "../utils/generateToken.js";
 dotenv.config();
 
 const router = express.Router();
