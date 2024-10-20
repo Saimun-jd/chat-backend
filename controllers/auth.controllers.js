@@ -12,6 +12,10 @@ import { sendMail } from "../utils/sendEmail.js";
 
 
 export const loginUser = async (req, res) => {
+    const errorMessage = req.session.messages? req.session.messages[0]:null;
+    if(errorMessage) {
+        res.redirect(`https://slurpping.onrender.com?error=${encodeURIComponent(errorMessage)}`);
+    }
     try{
         const {username, password} = req.body;
         const user = await User.findOne({username});
