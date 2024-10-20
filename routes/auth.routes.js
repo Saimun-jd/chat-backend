@@ -117,7 +117,7 @@ router.get('/mongo-auth-info', async (req, res) => {
     if(!id) {
       res.status(400).json({error: "couldn't retrive id from query"});
     }
-    
+    console.log("id is ", id);
     // Get the session ID from the cookie
     // const sessionId = req.cookies['mongo_session']; 
     // console.log('Session ID from cookie:', sessionId);
@@ -135,7 +135,7 @@ router.get('/mongo-auth-info', async (req, res) => {
     // }
 
     // // Find the session in MongoDB
-    const usr = User.findOne({_id: id});
+    const usr = User.findById(id);
     if(!usr) {
       console.log("no user found with this id");
       res.status(400).json({error: "invalid user access via id"});
