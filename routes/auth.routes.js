@@ -81,7 +81,7 @@ router.get(
     //   accessToken: token,
     //   isVerified: req.user.isVerified
     // };
-    console.log('Setting googleAuthInfo in session:', req.session.googleAuthInfo);
+    // console.log('Setting googleAuthInfo in session:', req.session.googleAuthInfo);
     res.redirect(`https://slurpping.onrender.com/google-auth-success?id=${req.user._id}`);
 
     // req.session.save((err) => {
@@ -135,7 +135,7 @@ router.get('/mongo-auth-info', async (req, res) => {
     // }
 
     // // Find the session in MongoDB
-    const usr = User.findById(id);
+    const usr = await User.findById(id);
     if(!usr) {
       console.log("no user found with this id");
       res.status(400).json({error: "invalid user access via id"});
