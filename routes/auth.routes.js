@@ -76,7 +76,7 @@ router.get(
 router.get(
 	"/google/callback",
 	passport.authenticate("google", {
-		failureRedirect: `https://slurpping-api.onrender.com/api/auth/login`,
+		failureRedirect: `https://slurpping.onrender.com?error=${encodeURIComponent("please sign in with your username instead.")}`,
     failureMessage: true
 	}),
 	(req, res) => {
