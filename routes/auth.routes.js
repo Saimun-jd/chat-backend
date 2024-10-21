@@ -39,7 +39,7 @@ passport.use(
             return done(null, false, {message: "please sign in with your username instead."});
           } else{
             // existing user
-            return done(null, user);
+            return done(null, emailfound);
           }
 
 				} 
