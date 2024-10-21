@@ -28,26 +28,31 @@ passport.use(
 		},
 		async (accessToken, refreshToken, profile, done) => {
 			try {
-				let user = await User.findOne({ googleId: profile.id });
 				let emailfound = await User.findOne({
 					email: profile.emails[0].value,
 				});
+        // let user = await User.findOne({ googleId: profile.id });
 
-				if (!user && !emailfound) {
-					user = new User({
-						googleId: profile.id,
-						username: profile.displayName,
-						email: profile.emails[0].value,
-						isVerified: true,
-					});
-					await user.save();
+				if (emailfound) {
+          if(!emailfound.googleId){
+            console.log("please sign in with your username instead.");
+            return done(null, false, {message: "please sign in with your username instead."});
+          } else{
+            // existing user
+            return done(null, user);
+          }
+
 				} 
-        else if(!user && emailfound) { //user didn't signup with google
-          console.log("please sign in with your username instead.");
-          return done({error: "please sign in with your username instead."}, null);
-        }
+        // new user
+        let user = new User({
+              googleId: profile.id,
+              username: profile.displayName,
+              email: profile.emails[0].value,
+              isVerified: true,
+            });
+        await user.save();
+        return done(null, user);
 
-				return done(null, user);
 			} catch (error) {
 				return done(error, null);
 			}
@@ -71,13 +76,11 @@ router.get(
 router.get(
 	"/google/callback",
 	passport.authenticate("google", {
-		failureRedirect: "https://slurpping.onrender.com",
+		failureRedirect: `https://slurpping-api.onrender.com/login`,
+    failureMessage: true
 	}),
 	(req, res) => {
 		// console.log('Google callback received');
-    if(req.error) {
-      `https://slurpping.onrender.com?error=${req.error}`
-    }
 		res.redirect(
 			`https://slurpping.onrender.com/google-auth-success?id=${req.user._id}`
 		);
