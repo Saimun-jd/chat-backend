@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
         default: false
     },
     emailtoken: {type: String},
+    isTenant: {
+        type: Boolean,
+        default: false,
+    },
 }, {timestamps: true});
 
 const user = mongoose.model("User", userSchema);
